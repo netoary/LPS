@@ -1,0 +1,15 @@
+paciente
+{
+background-color: #ffffff;
+width: 100%;
+}
+numeroPaciente
+{
+display: block;
+color: #0000FF;
+font-size: 20pt;
+}
+paciente * 
+{
+display: none;
+}
