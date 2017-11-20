@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Home</title>
+    <style>
+      table, td {
+        border: 1px solid black;
+        border-collapse: collapse;
+      }
+    </style>
+  </head>
+  <body>
+    <p id="demo">Para pesquisar paciente pelo seu numero digite o numero e aperte ENTER</p>
+    Numero Paciente: <input type="search" id="myInput" onsearch="pesquisar()" name="numeroPaciente"><br>
+    <br>
+    <button onclick="myFunction()">Mostrar Todos</button>
+    <button onclick="clearTable()">Apagar tabela</button>
+    <br>
+    <br>
+    <table id="tabela">
+      <tr id="myTr"> </tr>
+    </table>
+    <p id="demo2"></p>
+
+    <script>
+    //apaga toda a tabela e o elemento com o id "demo2"
+      function clearTable(){
+        document.getElementById("demo2").innerHTML = "";
+    		var linhas = document.getElementById("tabela").rows;
+        if(linhas!= null){
+      		var i = 0;
+      		for (i= linhas.length-1; i>=0; i--){
+    				document.getElementById("tabela").deleteRow(i);
+    			}
+    		}
+      }
+    //pesquisar os dados do paciente pelo seu numero
+      function pesquisar(){
+        //limpa a tela antes de realizar a pesquisa
+        clearTable();
+        //conectar com o xml
+        var xhttp;
+        xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                pesquisa(this);
+            }
+        };
+        xhttp.open("GET", "paciente.xml", true);
+        xhttp.send();
+
+        function pesquisa(xml){
+          var entrada = document.getElementById("myInput").value;
+          var table = document.getElementById("tabela");
+          var x, y, i, cont=1, cont2=0, xmlDoc, row;
+          xmlDoc = xml.responseXML;
+          //a variável y representa um paciente
+          y = xmlDoc.documentElement.childNodes;
+          for (j = 0; j<y.length; j++){
+            if (xmlDoc.getElementsByTagName("paciente")[j] != null) {
+              //a variável x representaos filhos de paciente[j]
+              x = xmlDoc.getElementsByTagName("paciente")[j].childNodes;
+              if(x[1].firstChild!=null){
+                //teste para procurar o numero digitado
+                if (entrada == x[1].firstChild.nodeValue){
+                  //cria nova linha na tabela com os nomes dos campos
+                  novaTabela(xml, cont-1, j);
+                  //cria nova linha vazia
+                  row = table.insertRow(cont);
+                  //percorre todos os nos do paciente[j]
+                  for (i = 0; i < x.length ;i++) {
+                    //se o nó não for vazio adiciona o seu valor na prixima celula da linha criada
+                    if (x[i].firstChild!=null && x[i].nodeName != "#text"){
+                        var cell1 = row.insertCell(cont2);
+                        cell1.innerHTML = x[i].childNodes[0].nodeValue;;
+                        cont2++;
+                    }else{
+                        //senao insere uma celula em branco
+                        if (x[i].nodeName != "#text"){
+                          var cell1 = row.insertCell(cont2);
+                          cell1.innerHTML = "";
+                          cont2++;
+                        }
+                    }
+                  }
+                  cont2=0;
+                  cont+=2;
+                }
+              }
+            }
+          }
+          //caso o valor de cont não seja atualizado, não foi encontrado o paciente
+          if (cont==1) {
+            document.getElementById("demo2").innerHTML = "Numero nao encontrado ";
+          }
+        }
+        //funcao que adiciona uma nova linha na tabela com os nomes dos nos
+        function novaTabela(xml, posi, numero) {
+          var table = document.getElementById("tabela");
+          var x, i, cont=0, xmlDoc, row;
+          xmlDoc = xml.responseXML;
+          x = xmlDoc.getElementsByTagName("paciente")[numero].childNodes;
+          row = table.insertRow(posi);
+          for (i = 0; i < x.length ;i++) {
+              if (x[i].nodeName != "#text"){
+                  var cell1 = row.insertCell(cont);
+                  cont++;
+                  cell1.innerHTML = x[i].nodeName;
+              }
+          }
+        }
+      }
+      //Adicionar os dados em uma tabela dinamicamente
+      function myFunction(){
+        document.getElementById("demo2").innerHTML = "";
+        var xhttp;
+        xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                addLinhas(this);
+            }
+        };
+        xhttp.open("GET", "paciente.xml", true);
+        xhttp.send();
+        function addLinhas(xml){
+          var table = document.getElementById("tabela");
+          var x, y, i, j, xmlDoc, row, cont=1, cont2=0;
+          xmlDoc = xml.responseXML;
+          //a variável y representa um paciente
+          y = xmlDoc.documentElement.childNodes;
+          for (j = 0; j<y.length; j++){
+            if (xmlDoc.getElementsByTagName("paciente")[j] != null) {
+              //cria nova linha na tabela com os nomes dos campos
+              novaTabela(xml, cont-1, j);
+              //a variável x representaos filhos de paciente[j]
+              x = xmlDoc.getElementsByTagName("paciente")[j].childNodes;
+              //cria nova linha vazia
+              row = table.insertRow(cont);
+              //percorre todos os nos do paciente[j]
+              for (i = 0; i < x.length ;i++) {
+                //se o nó não for vazio adiciona o seu valor na prixima celula da linha criada
+                if (x[i].firstChild!=null && x[i].nodeName != "#text"){
+                    var cell1 = row.insertCell(cont2);
+                    cell1.innerHTML = x[i].childNodes[0].nodeValue;;
+                    cont2++;
+                  }else{
+                    //senao insere uma celula em branco
+                    if (x[i].nodeName != "#text"){
+                      var cell1 = row.insertCell(cont2);
+                      cell1.innerHTML = "";
+                      cont2++;
+                    }
+                  }
+              }
+              cont2=0;
+              cont+=2;
+            }
+          }
+        }
+        //funcao que adiciona uma nova linha na tabela com os nomes dos nos
+        function novaTabela(xml, posi, numero) {
+            var table = document.getElementById("tabela");
+            var x, i, cont=0, xmlDoc, row;
+            xmlDoc = xml.responseXML;
+            x = xmlDoc.getElementsByTagName("paciente")[numero].childNodes;
+            row = table.insertRow(posi);
+            for (i = 0; i < x.length ;i++) {
+                if (x[i].nodeName != "#text"){
+                    var cell1 = row.insertCell(cont);
+                    cont++;
+                    cell1.innerHTML = x[i].nodeName;
+                }
+            }
+          }
+    }
+    </script>
+  </body>
+</html>
